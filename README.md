@@ -36,7 +36,7 @@ optional arguments:
 ```
 
 ## Ethical Notice
-The developer of this program, Josh Schiavone, is not resposible for misuse of this data gathering tool. Do not use darkdump to navigate websites that take part in any activity that is identified as illegal in the laws and regulations of your government. May God bless you all. 
+The developer of this program, Josh Schiavone, is not resposible for misuse of this data gathering tool. Do not use darkdump to navigate websites that take part in any activity that is identified as illegal under the laws and regulations of your government. May God bless you all. 
 
 ## License 
 MIT License<br/>
