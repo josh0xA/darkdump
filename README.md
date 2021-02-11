@@ -35,6 +35,10 @@ optional arguments:
 
 ```
 
+<p align="center">
+  <img src="https://github.com/josh0xA/darkdump/blob/main/imgs/darkdump_example_output.png?raw=true">
+</p>
+
 ## Ethical Notice
 The developer of this program, Josh Schiavone, is not resposible for misuse of this data gathering tool. Do not use darkdump to navigate websites that take part in any activity that is identified as illegal under the laws and regulations of your government. May God bless you all. 
 
