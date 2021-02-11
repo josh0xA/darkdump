@@ -34,7 +34,7 @@ optional arguments:
   -p PAGE, --page PAGE  the page number to filter through the results that the search engine returns (default=1).
 
 ```
-
+## Visual
 <p align="center">
   <img src="https://github.com/josh0xA/darkdump/blob/main/imgs/darkdump_example_output.png?raw=true">
 </p>
