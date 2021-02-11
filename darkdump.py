@@ -116,8 +116,6 @@ class Darkdump(object):
         except IndexError:
             print(clr.BOLD + clr.R + f"[-] No results found for query: {self.query}\n" + clr.END)
 
-        
-
 def darkdump_main():
     cfg = Configuration()
     clr = Colors()
