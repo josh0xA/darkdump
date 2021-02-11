@@ -14,7 +14,7 @@ Darkdump is a simple script written in Python3.9 in which it allows users to ent
 Example 1: ``python3 darkdump.py --query programming``<br/>
 Example 2: ``python3 darkdump.py --query="chat rooms"``<br/>
 Example 3: ``python3 darkdump.py --query hackers --page 2``<br/>
- - the 'page' argument filters through the second page of the results that the darksearch engine returns<br/>
+ - Note: The 'page' argument filters through the inputted page number of the results that the darksearch engine returns<br/>
 ## Menu
 ```
 
