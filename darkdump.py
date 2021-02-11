@@ -53,6 +53,7 @@ class Configuration:
     DARKDUMP_ERROR_CODE_STANDARD = -1
     DARKDUMP_SUCCESS_CODE_STANDARD = 0
 
+    DARKDUMP_MIN_DATA_RETRIEVE_LENGTH = 1
     DARKDUMP_RUNNING = False
     DARKDUMP_OS_UNIX_LINUX = False
     DARKDUMP_OS_WIN32_64 = False
@@ -108,7 +109,7 @@ class Darkdump(object):
             print(clr.BOLD + clr.R + str(re) + clr.END)
 
         try:
-            if json_data["total"] >= cfg.DARKDUMP_ERROR_CODE_STANDARD: # data >= 1
+            if json_data["total"] >= cfg.DARKDUMP_MIN_DATA_RETRIEVE_LENGTH: # data >= 1
                 for key in range(0, 18):             
                     site_title = json_data['data'][key]['title']
                     site_onion_link = json_data['data'][key]['link']
