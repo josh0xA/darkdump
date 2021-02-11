@@ -1,4 +1,8 @@
 # Darkdump - Search The Deep Web Straight From Your Terminal
+<p align="center">
+  <img src="https://github.com/josh0xA/darkdump/blob/main/imgs/darkdumplogo.png?raw=true">
+</p>
+
 ## About Darkdump
 Darkdump is a simple script written in Python3.9 in which it allows users to enter a search term (query) in the command line and darkdump will pull all the deep web sites relating to that query. Darkdump wraps up the darksearch.io API. 
 ## Installation
