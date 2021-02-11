@@ -11,5 +11,33 @@ Example 1: ``python3 darkdump.py --query programming``<br/>
 Example 2: ``python3 darkdump.py --query="chat rooms"``<br/>
 Example 3: ``python3 darkdump.py --query hackers --page 2``<br/>
  - the 'page' argument filters through the second page of the results that the darksearch engine returns<br/>
+## Menu
+```
 
+     ____          _     _
+    |    \ ___ ___| |_ _| |_ _ _____ ___
+    |  |  | .'|  _| '_| . | | |     | . |
+    |____/|__,|_| |_,_|___|___|_|_|_|  _|
+                                    |_|
 
+        Developed By: Josh Schiavone
+        https://github.com/josh0xA
+            joshschiavone.com
+
+usage: darkdump.py [-h] [-v] -q QUERY [-p PAGE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --version         returns darkdump's version
+  -q QUERY, --query QUERY
+                        the keyword or string you want to search on the deepweb
+  -p PAGE, --page PAGE  the page number to filter through the results that the search engine returns (default=1).
+
+```
+
+## Ethical Notice
+The developer of this program, Josh Schiavone, is not resposible for misuse of this data gathering tool. Do not use darkdump to navigate websites that take part in any activity that is identified as illegal in the laws and regulations of your government. May God bless you all. 
+
+## License 
+MIT License
+Copyright (c) Josh Schiavone
