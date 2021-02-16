@@ -1,7 +1,7 @@
 '''
 MIT License
 
-Copyright (c) 2020 Josh Schiavone
+Copyright (c) 2021 Josh Schiavone
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
