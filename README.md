@@ -1,6 +1,6 @@
 # Darkdump - Search The Deep Web Straight From Your Terminal
 <p align="center">
-  ![ddumplogo](https://user-images.githubusercontent.com/29878743/209738362-06d14d60-af97-47c2-a482-10e919a1ef45.png)
+  ![ddumplogo](https://github.com/josh0xA/darkdump/blob/main/imgs/ddumplogo.png?raw=true)
 </p>
 
 ## About Darkdump (Recent Notice - 03/29/22)
