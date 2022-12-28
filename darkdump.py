@@ -132,8 +132,8 @@ class Darkdump(object):
                         clr.END)
             else:
                 print(clr.BOLD + clr.R + "[!] No results found." + clr.END)
-        except Exception as e:
-            print(clr.BOLD + clr.R + f"[!] Error: {e}" + clr.END)
+        except IndexError as ie:
+            print(clr.BOLD + clr.O + f"[~] No more results to be shown ({ie}): " + clr.END)
 
 def darkdump_main():
     clr = Colors()
