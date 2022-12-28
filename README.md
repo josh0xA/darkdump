@@ -1,7 +1,6 @@
 # Darkdump - Search The Deep Web Straight From Your Terminal
 <p align="center">
-  <img width="106" alt="Screen_Shot_2022-12-27_at_7 05 05_PM-removebg-preview" src="https://user-images.githubusercontent.com/29878743/209738212-f682d2db-dec8-4e60-a112-31121d4fcfb4.png">
-
+  ![ddumplogo](https://user-images.githubusercontent.com/29878743/209738362-06d14d60-af97-47c2-a482-10e919a1ef45.png)
 </p>
 
 ## About Darkdump (Recent Notice - 03/29/22)
