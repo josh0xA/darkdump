@@ -1,7 +1,7 @@
 # Darkdump2 - Search The Deep Web Straight From Your Terminal
 <p align="center">
   <img src="https://github.com/josh0xA/darkdump/blob/main/imgs/ddumplogo.png?raw=true"</img>
-  <br>
+  <br><br>
   <b>Featured In</b>
   <br>
   <a href="https://blackarch.org/sniffer.html"><img src="https://i.imgur.com/IPiAUZi.png">
