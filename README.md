@@ -1,6 +1,7 @@
 # Darkdump - Search The Deep Web Straight From Your Terminal
 <p align="center">
-  <img src="https://github.com/josh0xA/darkdump/blob/main/imgs/darkdumplogo.png?raw=true">
+  <img width="106" alt="Screen_Shot_2022-12-27_at_7 05 05_PM-removebg-preview" src="https://user-images.githubusercontent.com/29878743/209738212-f682d2db-dec8-4e60-a112-31121d4fcfb4.png">
+
 </p>
 
 ## About Darkdump (Recent Notice - 03/29/22)
@@ -27,6 +28,7 @@ Example 3: ``python3 darkdump.py --query hackers --page 2``<br/>
         Developed By: Josh Schiavone
         https://github.com/josh0xA
             joshschiavone.com
+              Version 2.0
 
 usage: darkdump.py [-h] [-v] -q QUERY [-p PAGE]
 
