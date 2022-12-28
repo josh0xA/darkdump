@@ -36,7 +36,7 @@ optional arguments:
   -v, --version         returns darkdump's version
   -q QUERY, --query QUERY
                         the keyword or string you want to search on the deepweb
-  -p PAGE, --page PAGE  the page number to filter through the results that the search engine returns (default=1).
+  -a AMOUNT, --amount AMOUNT  the amount of results you want to retrieve (default: 10).
 
 ```
 ## Visual
