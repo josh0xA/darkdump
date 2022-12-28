@@ -1,6 +1,11 @@
 # Darkdump2 - Search The Deep Web Straight From Your Terminal
 <p align="center">
   <img src="https://github.com/josh0xA/darkdump/blob/main/imgs/ddumplogo.png?raw=true"</img>
+  <br>
+  <b>Featured In</b>
+  <br>
+  <a href="https://blackarch.org/sniffer.html"><img src="https://i.imgur.com/IPiAUZi.png">
+  <a href="https://www.kitploit.com/2020/06/espionage-network-packet-and-traffic.html"><img src="https://raw.githubusercontent.com/josh0xA/Espionage/master/imgs/kitploit-Logo-2015-04-27%252B-%252B%2525283%252529.png"></a>
 </p>
 
 ## About Darkdump (Recent Notice - 12/27/22)
