@@ -4,7 +4,7 @@
 </p>
 
 ## About Darkdump (Recent Notice - 12/27/22)
-Darkdump is a simple script written in Python3.9 in which it allows users to enter a search term (query) in the command line and darkdump will pull all the deep web sites relating to that query. Darkdump2.0 is here, enjoy!
+Darkdump is a simple script written in Python3.11 in which it allows users to enter a search term (query) in the command line and darkdump will pull all the deep web sites relating to that query. Darkdump2.0 is here, enjoy!
 ## Installation
 1) ``git clone https://github.com/josh0xA/darkdump``<br/>
 2) ``cd darkdump``<br/>
