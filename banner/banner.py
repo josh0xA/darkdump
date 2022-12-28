@@ -1,3 +1,4 @@
+
 class Banner(object):
     def LoadDarkdumpBanner(self):
         try:
@@ -8,11 +9,12 @@ class Banner(object):
     |  |  | .'|  _| '_| . | | |     | . |
     |____/|__,|_| |_,_|___|___|_|_|_|  _|
                                     |_|  
-
         Developed By: Josh Schiavone
         https://github.com/josh0xA  
-            joshschiavone.com     
-            '''
+            joshschiavone.com 
+              Version: 2.0
+              '''
+
             cprint(banner, 'magenta', attrs=['bold'])
 
         except ImportError as ie:
