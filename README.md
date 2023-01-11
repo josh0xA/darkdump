@@ -18,11 +18,12 @@ Darkdump is a simple script written in Python3.11 in which it allows users to en
 Example 1: ``python3 darkdump.py --query programming``<br/>
 Example 2: ``python3 darkdump.py --query="chat rooms"``<br/>
 Example 3: ``python3 darkdump.py --query hackers --amount 12``<br/>
+
+ - Note: The 'amount' argument filters the number of results outputted<br/>
   
 ### Usage With Increased Anonymity 
 Darkdump Proxy: ``python3 darkdump.py --query bitcoin -p``<br/>
   
- - Note: The 'amount' argument filters the number of results outputted<br/>
 ## Menu
 ```
 
