@@ -18,6 +18,10 @@ Darkdump is a simple script written in Python3.11 in which it allows users to en
 Example 1: ``python3 darkdump.py --query programming``<br/>
 Example 2: ``python3 darkdump.py --query="chat rooms"``<br/>
 Example 3: ``python3 darkdump.py --query hackers --amount 12``<br/>
+  
+### Usage With Increased Anonymity 
+Darkdump Proxy: ``python3 darkdump.py --query bitcoin -p``<br/>
+  
  - Note: The 'amount' argument filters the number of results outputted<br/>
 ## Menu
 ```
@@ -33,14 +37,16 @@ Example 3: ``python3 darkdump.py --query hackers --amount 12``<br/>
             joshschiavone.com
               Version 2.0
 
-usage: darkdump.py [-h] [-v] -q QUERY [-p PAGE]
+usage: darkdump.py [-h] [-v] [-q QUERY] [-a AMOUNT] [-p]
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -v, --version         returns darkdump's version
   -q QUERY, --query QUERY
                         the keyword or string you want to search on the deepweb
-  -a AMOUNT, --amount AMOUNT  the amount of results you want to retrieve (default: 10).
+  -a AMOUNT, --amount AMOUNT
+                        the amount of results you want to retrieve (default: 10)
+  -p, --proxy           use darkdump proxy to increase anonymity
 
 ```
 ## Visual
