@@ -71,11 +71,13 @@ class Configuration:
     DARKDUMP_OS_DARWIN = False
 
     DARKDUMP_REQUESTS_SUCCESS_CODE = 200
+    DARKDUMP_PROXY = False
 
     descriptions = []
     urls = []
 
     __darkdump_api__ = "https://ahmia.fi/search/?q="
+    __proxy_api__ = "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=elite"
 
 class Platform(object):
     def __init__(self, execpltf):
@@ -105,11 +107,38 @@ class Platform(object):
             else: os.system('cls')
         else: pass
 
+class Proxies(object):
+    def __init__(self):
+        self.proxy = {}
+
+    def assign_proxy(self):
+        req = requests.get(Configuration.__proxy_api__)
+        if req.status_code == Configuration.DARKDUMP_REQUESTS_SUCCESS_CODE:
+            for line in req.text.splitlines():
+                if line:
+                    proxy = line.split(':')
+                    self.proxy["http"] = "http://" + proxy[0] + ':' + proxy[1]
+        else: pass
+    
+    def get_proxy(self):
+        return self.proxy["http"]
+
+    def get_proxy_dict(self):
+        return self.proxy
+
 class Darkdump(object):
     def crawl(self, query, amount):      
         clr = Colors()
+        prox = Proxies()
+
         headers = random.choice(Headers().useragent)
-        page = requests.get(Configuration.__darkdump_api__ + query) 
+        if Configuration.DARKDUMP_PROXY == True:
+            prox.assign_proxy()
+            proxy = prox.get_proxy()
+            print(clr.BOLD + clr.P + "~:~ Using Proxy: " + clr.C + proxy + clr.END + '\n')
+            page = requests.get(Configuration.__darkdump_api__ + query, proxies=prox.get_proxy_dict())
+        else: 
+            page = requests.get(Configuration.__darkdump_api__ + query) 
         page.headers = headers
 
         soup = BeautifulSoup(page.content, 'html.parser')
@@ -139,9 +168,11 @@ def darkdump_main():
     clr = Colors()
     cfg = Configuration()
     bn = Banner() 
+    prox = Proxies()
 
     Platform(True).clean_screen()
     Platform(True).get_operating_system_descriptor()
+    Proxies().assign_proxy()
     bn.LoadDarkdumpBanner()
     print(notice)
     time.sleep(1.3)
@@ -161,10 +192,18 @@ def darkdump_main():
                         help="the amount of results you want to retrieve (default: 10)",
                         type=int)
 
+    parser.add_argument("-p",
+                        "--proxy",
+                        help="use darkdump proxy to increase anonymity",
+                        action="store_true")
+
     args = parser.parse_args()
 
     if args.version:
         print(clr.BOLD + clr.B + f"Darkdump Version: {__version__}\n" + clr.END)
+    
+    if args.proxy: 
+        Configuration.DARKDUMP_PROXY = True
 
     if args.query and args.amount:
         print(clr.BOLD + clr.B + f"Searching For: {args.query} and showing {args.amount} results...\n" + clr.END)
@@ -179,3 +218,4 @@ def darkdump_main():
 
 if __name__ == "__main__":
     darkdump_main()
+
