@@ -1,4 +1,4 @@
-# Darkdump2 - Search The Deep Web Straight From Your Terminal
+# Darkdump - Search The Deep Web Straight From Your Terminal
 <p align="center">
   <img src="https://github.com/josh0xA/darkdump/blob/main/imgs/ddumplogo.png?raw=true"</img>
   <br><br>
