@@ -1,8 +1,4 @@
-# darkdump
-<p align="center">
-  <img src="https://github.com/josh0xA/darkdump/blob/main/imgs/ddumplogo.png?raw=true"</img>
-  <br><br>
-</p>
+# Darkdump
 
 ## About Darkdump (Recent Notice - 12/27/22)
 Darkdump is a simple script written in Python3 in which it allows users to enter a search term (query) in the command line and darkdump will pull all the deep web sites relating to that query. 
