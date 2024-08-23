@@ -12,13 +12,13 @@ Darkdump is a simple script written in python in which it allows users to enter 
 ### Tor Configuration 
 To use Darkdump effectively, you need to configure Tor to allow your script to control it via the Tor control port. Here's how to set up your `torrc` file and verify that Tor is running: <br/>
 
-Step 1: Install Tor
+#### Step 1: Install Tor
 If Tor is not already installed on your system, you need to install it. Here's how you can install Tor on various operating systems:
 
 Debian/Kali/Ubuntu: `sudo apt install tor`<br/>
 MacOS: `brew install tor`<br/>
 
-Step 2: Configure the Tor torrc File<br/>
+#### Step 2: Configure the Tor torrc File<br/>
 Locate your torrc file. This file is usually found at `/etc/tor/torrc`on Linux and sometimes Mac. 
 
 Add the following lines to your torrc to enable the control port and set a control port password:
@@ -28,7 +28,7 @@ HashedControlPassword [YourHashedPasswordHere]
 ```
 Replace `[YourHashedPasswordHere]` with a hashed password which can be generated using the `tor --hash-password` command: `tor --hash-password "my_password"`
 
-Step 3: Start Tor Service
+#### Step 3: Start Tor Service
 Linux: `sudo systemctl start tor.service`<br/>
 MacOS: `brew services start tor`<br/>
 
