@@ -32,6 +32,11 @@ Replace `[YourHashedPasswordHere]` with a hashed password which can be generated
 Linux: `sudo systemctl start tor.service`<br/>
 MacOS: `brew services start tor`<br/>
 
+### Example Queries: 
+`python3 darkdump.py -q "hacking" -a 10 --scrape --proxy` - search for 10 links and scrape each site <br/>
+`python3 darkdump.py -q "free movies" -a 25` - don't scrape, just return 25 links for that query (does not require tor) <br/>
+`python3 darkdump.py -q "marketplaces" -a 15 --scrape --proxy -i` - search for 10 links and scrape each site as well as find and store images.
+
 ## Menu
 ```
 
