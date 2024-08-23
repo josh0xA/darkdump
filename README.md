@@ -1,4 +1,4 @@
-# Darkdump
+# darkdump
 
 ## About Darkdump 
 Darkdump is a simple script written in python in which it allows users to enter a search query in which darkdump provides the ability to scrape .onion sites relating to that query to try to extract emails, metadata, keywords, images, etc. Darkdump retrieves sites via Ahmia.fi and scrapes those links when connected via the tor network. 
