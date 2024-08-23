@@ -2,3 +2,6 @@ requests>=2.25.1
 termcolor>=1.1.0
 argparse>=1.4.0
 beautifulsoup4>=4.11.1
+nltk>=3.5
+textblob>=0.15.3
+

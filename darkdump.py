@@ -1,6 +1,6 @@
 '''
 MIT License
-Copyright (c) 2023 Josh Schiavone
+Copyright (c) 2024 Josh Schiavone
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,35 +21,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-# Please note, this code sucks. I had to update it to a new API with limited time, so I just threw it together. 
+__version__ = 3
 
-import sys 
+import sys
 sys.dont_write_bytecode = True
-
-__author__ = 'Josh Schiavone'
-__version__ = '2.0'
-__license__ = 'MIT'
 
 import requests
 from bs4 import BeautifulSoup
 import os
 import time
+
 import argparse
 import random
+import re
+import json
+
+import socket
 
 from headers.agents import Headers
 from banner.banner import Banner
+
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.probability import FreqDist
+from textblob import TextBlob
+
 
 notice = '''
 Note: 
     This tool is not to be used for illegal purposes.
     The author is not responsible for any misuse of Darkdump.
-    May God bless you all. 
+    May God bless you all.
+    https://joshschiavone.com - https://github.com/josh0xA
 '''
 
 class Colors:
-    # Console colors
-    W = '\033[0m'  # white (normal)
+    W = '\033[0m'  # white 
     R = '\033[31m'  # red
     G = '\033[32m'  # green
     O = '\033[33m'  # orange
@@ -63,21 +74,22 @@ class Colors:
 class Configuration:
     DARKDUMP_ERROR_CODE_STANDARD = -1
     DARKDUMP_SUCCESS_CODE_STANDARD = 0
-
     DARKDUMP_MIN_DATA_RETRIEVE_LENGTH = 1
     DARKDUMP_RUNNING = False
+
     DARKDUMP_OS_UNIX_LINUX = False
     DARKDUMP_OS_WIN32_64 = False
     DARKDUMP_OS_DARWIN = False
 
     DARKDUMP_REQUESTS_SUCCESS_CODE = 200
     DARKDUMP_PROXY = False
+    DARKDUMP_TOR_RUNNING = False 
 
     descriptions = []
     urls = []
 
+    __socks5init__ = "socks5h://localhost:9050"
     __darkdump_api__ = "https://ahmia.fi/search/?q="
-    __proxy_api__ = "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=elite"
 
 class Platform(object):
     def __init__(self, execpltf):
@@ -107,115 +119,222 @@ class Platform(object):
             else: os.system('cls')
         else: pass
 
-class Proxies(object):
-    def __init__(self):
-        self.proxy = {}
-
-    def assign_proxy(self):
-        req = requests.get(Configuration.__proxy_api__)
-        if req.status_code == Configuration.DARKDUMP_REQUESTS_SUCCESS_CODE:
-            for line in req.text.splitlines():
-                if line:
-                    proxy = line.split(':')
-                    self.proxy["http"] = "http://" + proxy[0] + ':' + proxy[1]
-        else: pass
-    
-    def get_proxy(self):
-        return self.proxy["http"]
-
-    def get_proxy_dict(self):
-        return self.proxy
+    def check_tor_connection(self, proxy_config):
+        test_url = 'http://api.ipify.org' 
+        try:
+            response = requests.get(test_url, proxies=proxy_config, timeout=10)
+            print(f"{Colors.BOLD + Colors.G}Tor service is active. {Colors.END}")
+            print(f"{Colors.BOLD + Colors.P}Current IP Address via Tor: {Colors.END}{response.text}")
+            return True  # Connection was successful
+        except:
+            print(f"{Colors.BOLD + Colors.R} Tor is inactive or not configured properly. Cannot scrape. {Colors.END}")
+            return False
 
 class Darkdump(object):
-    def crawl(self, query, amount):      
-        clr = Colors()
-        prox = Proxies()
+    def clean_text(self, html_content):
+        soup = BeautifulSoup(html_content, 'html.parser')
+        text = soup.get_text()
+        text = re.sub(r'[\r\n]+', ' ', text)
+        text = re.sub(r'\s+', ' ', text)
+        text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
+        return text.strip()
 
-        headers = random.choice(Headers().useragent)
-        if Configuration.DARKDUMP_PROXY == True:
-            prox.assign_proxy()
-            proxy = prox.get_proxy()
-            print(clr.BOLD + clr.P + "~:~ Using Proxy: " + clr.C + proxy + clr.END + '\n')
-            page = requests.get(Configuration.__darkdump_api__ + query, proxies=prox.get_proxy_dict())
-        else: 
-            page = requests.get(Configuration.__darkdump_api__ + query) 
-        page.headers = headers
+    def extract_keywords(self, text):
+        clean_text = self.clean_text(text)
+        stop_words = set(stopwords.words('english'))
+        word_tokens = word_tokenize(clean_text.lower())
+        filtered_text = [word for word in word_tokens if word.isalnum() and not word in stop_words]
+        freq_dist = FreqDist(filtered_text)
+        keywords = list(freq_dist)[:18] 
+        return keywords
 
-        soup = BeautifulSoup(page.content, 'html.parser')
-        results = soup.find(id='ahmiaResultsPage')
-        second_results = results.find_all('li', class_='result')
-        res_length = len(second_results)
+    def analyze_text(self, text):
+        # Tokenize text
+        words = word_tokenize(text)
+        # Remove stopwords
+        stop_words = set(stopwords.words('english'))
+        filtered_words = [word for word in words if word.lower() not in stop_words and word.isalnum()]
+        
+        freq_dist = FreqDist(filtered_words)
+        top_words = freq_dist.most_common(10)
 
-        for iterator in range(res_length):
-            Configuration.descriptions.append(second_results[iterator].find('p').text)
-            Configuration.urls.append(second_results[iterator].find('cite').text)
-        # Remove duplicates
-        Configuration.descriptions = list(dict.fromkeys(Configuration.descriptions))
-        Configuration.urls = list(dict.fromkeys(Configuration.urls))
+        blob = TextBlob(text)
+        sentiment = blob.sentiment
+
+        return {
+            'top_words': top_words,
+            'sentiment': {
+                'polarity': sentiment.polarity,  # -1 to 1 where 1 means positive statement
+                'subjectivity': sentiment.subjectivity  # 0 to 1 where 1 is very subjective
+            }
+        }
+
+    def sanitize_filename(self, url):
+        keepcharacters = (' ', '.', '_', '-')
+        return "".join(c for c in url if c.isalnum() or c in keepcharacters).rstrip()
+
+    def generate_html(self, image_urls, base_url):
+        filename = self.sanitize_filename(base_url) + '.html'
+        filepath = os.path.join('dd_scrape_image_dump', filename)
+        os.makedirs('dd_scrape_image_dump', exist_ok=True)
+        html_content = '<html><head><title>Image Gallery</title></head><body>'
+        for url in image_urls:
+            html_content += f'<img src="{url}" alt="Image" style="padding: 10px; height: 200px;"><br>'
+        html_content += '</body></html>'
+        
+        with open(filepath, 'w') as file:
+            file.write(html_content)
+        return filepath
+
+    def extract_links(self, soup):
+        links = [a['href'] for a in soup.find_all('a', href=True)]
+        return links
+
+    def extract_metadata(self, soup):
+        """Extract metadata from the page."""
+        meta_data = {}
+        for meta in soup.find_all('meta'):
+            meta_name = meta.get('name') or meta.get('property')
+            if meta_name:
+                meta_data[meta_name] = meta.get('content')
+        return meta_data
+
+    def extract_emails(self, soup):
+        text = soup.get_text()
+        email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
+        emails = email_pattern.findall(text)
+        return emails
+
+    def extract_document_links(self, soup):
+        doc_types = [
+            '.pdf', '.doc', '.docx', '.xlsx', '.xls', '.ppt', '.pptx',
+            '.txt', '.csv', '.rtf', '.odt', '.ods', '.odp', '.epub',
+            '.mobi', '.log', '.msg', '.wpd', '.wps', '.tex', '.vsd',
+            '.xml', '.json', '.xps', '.md', '.code', '.mp3', '.wav',
+            '.mp4', '.avi', '.mov', '.flv', '.wma', '.aac', '.dll',
+            '.exe', '.zip', '.tar', '.gz', '.rar', '.7z', '.bz2',
+            '.vmdk', '.iso', '.bin', '.img', '.dmg'
+        ]
+        links = [a['href'] for a in soup.find_all('a', href=True) if any(doc_type for doc_type in doc_types if a['href'].endswith(doc_type))]
+        return links
+
+
+    def crawl(self, query, amount, use_proxy=False, scrape_sites=False, scrape_images=False):
+        headers = {'User-Agent': random.choice(Headers.user_agents)}
+        proxy_config = {'http': 'socks5h://localhost:9050', 'https': 'socks5h://localhost:9050'} if use_proxy else {}
+
+        # Fetching the initial search page
         try:
-            if len(Configuration.descriptions) >= Configuration.DARKDUMP_MIN_DATA_RETRIEVE_LENGTH:
-                for iterator in range(amount):
-                    site_url = Configuration.urls[iterator]
-                    site_description = Configuration.descriptions[iterator]
-                    print(clr.BOLD + clr.G + f"[+] Website: {site_description}\n\t> Onion Link: {clr.R}{site_url}\n" + 
-                        clr.END)
-            else:
-                print(clr.BOLD + clr.R + "[!] No results found." + clr.END)
-        except IndexError as ie:
-            print(clr.BOLD + clr.O + f"[~] No more results to be shown ({ie}): " + clr.END)
+            page = requests.get(Configuration.__darkdump_api__ + query, headers=headers)
+            soup = BeautifulSoup(page.content, 'html.parser')
+            results = soup.find(id='ahmiaResultsPage')  # Adjust based on actual result container ID
+            second_results = results.find_all('li', class_='result')  # Adjust based on actual results tag and class
+        except Exception as e:
+            print(f"{Colors.BOLD + Colors.R} Error in fetching Ahmia.fi: {e} {Colors.END}")
+            return
+
+        seen_urls = set()  # This set will store URLs to avoid duplicates
+
+        if scrape_sites: 
+            if Platform(True).check_tor_connection(proxy_config) == False: return
+
+        for idx, result in enumerate(second_results[:min(amount + 1, len(second_results))], start=1):
+            site_url = result.find('cite').text
+            if "http://" not in site_url and "https://" not in site_url:
+                site_url = "http://" + site_url
+
+            if site_url in seen_urls:
+                continue
+            seen_urls.add(site_url)
+            
+            title = result.find('a').text if result.find('a') else "No title available"
+            description = result.find('p').text if result.find('p') else "No description available"
+            try:
+                if scrape_sites:
+                    try:
+                        site_response = requests.get(site_url, headers=headers, proxies=proxy_config)
+                        site_soup = BeautifulSoup(site_response.content, 'html.parser')
+
+                        text_analysis = self.analyze_text(site_soup.get_text())
+                        metadata = self.extract_metadata(site_soup)
+                        links = self.extract_links(site_soup)
+                        emails = self.extract_emails(site_soup)
+                        documents = self.extract_document_links(site_soup)
+
+                        if scrape_images:
+                            images = site_soup.find_all('img')
+                            image_urls = [img['src'] for img in images if img.get('src')]
+                            image_urls = [url if url.startswith('http') else site_url + url for url in image_urls]
+
+                            html_path = self.generate_html(image_urls, site_url)
+                            images_str = f"{Colors.BOLD}| Images Gallery: {Colors.END}{Colors.G}{os.path.abspath(html_path)}{Colors.END}\n"
+
+                        print('-' * 50)
+                        print(f"{Colors.BOLD}{idx + 1}.\n --- [+] Website: {Colors.END}{Colors.P}{title.strip()}{Colors.END}")
+                        print(f"{Colors.BOLD}| Information: {Colors.END}{Colors.G}{description.strip()}{Colors.END}")
+                        print(f"{Colors.BOLD}| Onion Link: {Colors.END}{Colors.G}{site_url}{Colors.END}")
+                        print(f"{Colors.BOLD}| Keywords: {Colors.END}{Colors.G}{', '.join(self.extract_keywords(site_soup.get_text()))}{Colors.END}")
+                        print(f"{Colors.BOLD}\t- Sentiment: Polarity = {text_analysis['sentiment']['polarity']:.2f}, Subjectivity = {text_analysis['sentiment']['subjectivity']:.2f}")
+                        print(f"{Colors.BOLD}| Metadata: {Colors.END}{Colors.G}{json.dumps(metadata)}{Colors.END}")
+                        print(f"{Colors.BOLD}| Links Found: {Colors.END}{Colors.G}{len(links)}{Colors.END}")
+                        print(f"{Colors.BOLD}| Emails Found: {Colors.END}{Colors.G}{', '.join(emails) if emails else 'No emails found.'}{Colors.END}")
+                        print(f"{Colors.BOLD}| Documents Found: {Colors.END}{Colors.G}{', '.join(documents) if documents else 'No document links found.'}{Colors.END}")
+
+                        if scrape_images:
+                            if image_urls:
+                                print(images_str)
+                            else: print(f"{Colors.BOLD + Colors.GR} No images found. Skipping parse. {Colors.END}")
+
+                    except Exception as e: 
+                        print(f"{Colors.BOLD + Colors.O} Dead onion, skipping...: {site_url} {Colors.END}")
+
+                else: # No scrape
+                    print(f"{Colors.BOLD}{idx + 1}. --- [+] Website: {Colors.END}{Colors.P}{title.strip()}{Colors.END}")
+                    print(f"{Colors.BOLD}\t Information: {Colors.END}{Colors.G}{description.strip()}{Colors.END}")
+                    print(f"{Colors.BOLD}| Onion Link: {Colors.END}{Colors.G}{site_url}{Colors.END}\n")
+
+
+            except KeyboardInterrupt as ki:
+                print(f"{Colors.BOLD + Colors.R} Quitting... {Colors.END}")
+
 
 def darkdump_main():
     clr = Colors()
-    cfg = Configuration()
-    bn = Banner() 
-    prox = Proxies()
+    bn = Banner()
 
     Platform(True).clean_screen()
     Platform(True).get_operating_system_descriptor()
-    Proxies().assign_proxy()
     bn.LoadDarkdumpBanner()
     print(notice)
-    time.sleep(1.3)
-    # Set up argument parser
-    parser = argparse.ArgumentParser(description="Darkdump is a tool for searching the deep web for specific keywords. Made by yours truly.")
-    parser.add_argument("-v",
-                        "--version",
-                        help="returns darkdump's version",
-                        action="store_true")
-    parser.add_argument("-q",
-                        "--query",
-                        help="the keyword or string you want to search on the deepweb",
-                        type=str,
-                        required=False)
-    parser.add_argument("-a",
-                        "--amount",
-                        help="the amount of results you want to retrieve (default: 10)",
-                        type=int)
 
-    parser.add_argument("-p",
-                        "--proxy",
-                        help="use darkdump proxy to increase anonymity",
-                        action="store_true")
+    parser = argparse.ArgumentParser(description="Darkdump is an interface for scraping the deepweb through Ahmia. Made by yours truly.")
+    parser.add_argument("-v", "--version", help="returns darkdump's version", action="store_true")
+    parser.add_argument("-q", "--query", help="the keyword or string you want to search on the deepweb", type=str)
+    parser.add_argument("-a", "--amount", help="the amount of results you want to retrieve", type=int, default=10)
+    parser.add_argument("-p", "--proxy", help="use tor proxy for scraping", action="store_true")
+    parser.add_argument("-i", "--images", help="scrape images and visual content from the site", action="store_true")
+    parser.add_argument("-s", "--scrape", help="scrape the actual site for content and look for keywords", action="store_true")
 
     args = parser.parse_args()
 
     if args.version:
-        print(clr.BOLD + clr.B + f"Darkdump Version: {__version__}\n" + clr.END)
-    
-    if args.proxy: 
-        Configuration.DARKDUMP_PROXY = True
+        print(Colors.BOLD + Colors.B + f"Darkdump Version: {__version__}\n" + Colors.END)
 
-    if args.query and args.amount:
-        print(clr.BOLD + clr.B + f"Searching For: {args.query} and showing {args.amount} results...\n" + clr.END)
-        Darkdump().crawl(args.query, args.amount)
+    if args.proxy and not args.scrape:
+        print(Colors.BOLD + Colors.R + "Error: Proxy option '-p' must be used with the scraping option '-s'." + Colors.END)
+        parser.print_help()
+        sys.exit(1)
 
-    elif args.query:
-        print(clr.BOLD + clr.B + f"Searching For: {args.query} and showing 10 results...\n" + clr.END)
-        Darkdump().crawl(args.query, 10)
+    if args.images and not args.scrape:
+        print(Colors.BOLD + Colors.R + "Error: Images option '-i' must be used with the scraping option '-s'." + Colors.END)
+        parser.print_help()
+        sys.exit(1)
 
+    if args.query:
+        print(f"Searching For: {args.query} and showing {args.amount} results...\nIndexing is viable, skipping dead onions.\n")
+        Darkdump().crawl(args.query, args.amount, use_proxy=args.proxy, scrape_sites=args.scrape, scrape_images=args.images)
     else:
-        print(clr.BOLD + clr.O + "[~] Note: No query arguments were passed. Please supply a query to search. " + clr.END)
+        print("[~] Note: No query arguments were passed. Please supply a query to search.")
 
 if __name__ == "__main__":
     darkdump_main()
-
