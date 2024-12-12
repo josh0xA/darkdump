@@ -26,30 +26,29 @@ __version__ = 3
 import sys
 sys.dont_write_bytecode = True
 
+import nltk
+nltk.download('stopwords', quiet=True)
+nltk.download('punkt', quiet=True)
+nltk.download('punkt_tab', quiet=True)
+nltk.download('averaged_perceptron_tagger', quiet=True)
+
 import requests
 from bs4 import BeautifulSoup
 import os
 import time
-
 import argparse
 import random
 import re
 import json
-
 import socket
 
 from headers.agents import Headers
 from banner.banner import Banner
 
-import nltk
-nltk.download('stopwords')
-nltk.download('punkt')
-
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.probability import FreqDist
 from textblob import TextBlob
-
 
 notice = '''
 Note: 
@@ -120,14 +119,19 @@ class Platform(object):
         else: pass
 
     def check_tor_connection(self, proxy_config):
-        test_url = 'http://api.ipify.org' 
+        test_url = 'https://check.torproject.org/api/ip'
         try:
-            response = requests.get(test_url, proxies=proxy_config, timeout=10)
-            print(f"{Colors.BOLD + Colors.G}Tor service is active. {Colors.END}")
-            print(f"{Colors.BOLD + Colors.P}Current IP Address via Tor: {Colors.END}{response.text}")
-            return True  # Connection was successful
-        except:
-            print(f"{Colors.BOLD + Colors.R} Tor is inactive or not configured properly. Cannot scrape. {Colors.END}")
+            response = requests.get(test_url, proxies=proxy_config, timeout=20)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('IsTor', False):
+                    print(f"{Colors.BOLD + Colors.G}Tor service is active.{Colors.END}")
+                    print(f"{Colors.BOLD + Colors.P}Current IP Address via Tor: {Colors.END}{data.get('IP')}")
+                    return True
+            print(f"{Colors.BOLD + Colors.R}Connection successful but not through Tor.{Colors.END}")
+            return False
+        except Exception as e:
+            print(f"{Colors.BOLD + Colors.R}Tor is inactive or not configured properly: {str(e)}{Colors.END}")
             return False
 
 class Darkdump(object):
@@ -285,7 +289,7 @@ class Darkdump(object):
                                 print(images_str)
                             else: print(f"{Colors.BOLD + Colors.GR} No images found. Skipping parse. {Colors.END}")
 
-                    except Exception as e: 
+                    except Exception as e:
                         print(f"{Colors.BOLD + Colors.O} Dead onion, skipping...: {site_url} {Colors.END}")
 
                 else: # No scrape
