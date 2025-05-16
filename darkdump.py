@@ -239,7 +239,7 @@ class Darkdump(object):
         if scrape_sites: 
             if Platform(True).check_tor_connection(proxy_config) == False: return
 
-        for idx, result in enumerate(second_results[:min(amount + 1, len(second_results))], start=1):
+        for idx, result in enumerate(second_results[:min(amount, len(second_results))], start=1):
             site_url = result.find('cite').text
             if "http://" not in site_url and "https://" not in site_url:
                 site_url = "http://" + site_url
@@ -270,7 +270,7 @@ class Darkdump(object):
                             images_str = f"{Colors.BOLD}| Images Gallery: {Colors.END}{Colors.G}{os.path.abspath(html_path)}{Colors.END}\n"
 
                         print('-' * 50)
-                        print(f"{Colors.BOLD}{idx + 1}.\n --- [+] Website: {Colors.END}{Colors.P}{title.strip()}{Colors.END}")
+                        print(f"{Colors.BOLD}{idx}.\n --- [+] Website: {Colors.END}{Colors.P}{title.strip()}{Colors.END}")
                         print(f"{Colors.BOLD}| Information: {Colors.END}{Colors.G}{description.strip()}{Colors.END}")
                         print(f"{Colors.BOLD}| Onion Link: {Colors.END}{Colors.G}{site_url}{Colors.END}")
                         print(f"{Colors.BOLD}| Keywords: {Colors.END}{Colors.G}{', '.join(self.extract_keywords(site_soup.get_text()))}{Colors.END}")
@@ -289,7 +289,7 @@ class Darkdump(object):
                         print(f"{Colors.BOLD + Colors.O} Dead onion, skipping...: {site_url} {Colors.END}")
 
                 else: # No scrape
-                    print(f"{Colors.BOLD}{idx + 1}. --- [+] Website: {Colors.END}{Colors.P}{title.strip()}{Colors.END}")
+                    print(f"{Colors.BOLD}{idx}. --- [+] Website: {Colors.END}{Colors.P}{title.strip()}{Colors.END}")
                     print(f"{Colors.BOLD}\t Information: {Colors.END}{Colors.G}{description.strip()}{Colors.END}")
                     print(f"{Colors.BOLD}| Onion Link: {Colors.END}{Colors.G}{site_url}{Colors.END}\n")
 
@@ -328,6 +328,10 @@ def darkdump_main():
     if args.images and not args.scrape:
         print(Colors.BOLD + Colors.R + "Error: Images option '-i' must be used with the scraping option '-s'." + Colors.END)
         parser.print_help()
+        sys.exit(1)
+
+    if args.amount <= 0:
+        print(f"{Colors.BOLD + Colors.R}Error: Amount must be a positive integer.{Colors.END}")
         sys.exit(1)
 
     if args.query:
