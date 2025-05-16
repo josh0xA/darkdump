@@ -44,6 +44,7 @@ from banner.banner import Banner
 import nltk
 nltk.download('stopwords')
 nltk.download('punkt')
+nltk.download('punkt_tab')
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -145,7 +146,7 @@ class Darkdump(object):
         word_tokens = word_tokenize(clean_text.lower())
         filtered_text = [word for word in word_tokens if word.isalnum() and not word in stop_words]
         freq_dist = FreqDist(filtered_text)
-        keywords = list(freq_dist)[:18] 
+        keywords = list(freq_dist)[:18]
         return keywords
 
     def analyze_text(self, text):
@@ -254,7 +255,6 @@ class Darkdump(object):
                     try:
                         site_response = requests.get(site_url, headers=headers, proxies=proxy_config)
                         site_soup = BeautifulSoup(site_response.content, 'html.parser')
-
                         text_analysis = self.analyze_text(site_soup.get_text())
                         metadata = self.extract_metadata(site_soup)
                         links = self.extract_links(site_soup)
