@@ -4,4 +4,5 @@ argparse>=1.4.0
 beautifulsoup4>=4.11.1
 nltk>=3.5
 textblob>=0.15.3
+PySocks>=1.7.1
 

@@ -28,7 +28,7 @@ class Banner(object):
     def LoadDarkdumpBanner(self):
         try:
             from termcolor import cprint, colored
-            banner = '''
+            banner = r'''
      _            _       _                            __
   __| | __ _ _ __| | ____| |_   _ _ __ ___  _ __      / /
  / _` |/ _` | '__| |/ / _` | | | | '_ ` _ \| '_ \    / / 

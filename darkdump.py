@@ -89,7 +89,8 @@ class Configuration:
     descriptions = []
     urls = []
 
-    __socks5init__ = "socks5h://localhost:9050"
+    # Default Tor Browser SOCKS port is 9150 (9050 is used by the system daemon)
+    __socks5init__ = "socks5h://localhost:9150"
     __darkdump_api__ = "https://ahmia.fi/search/?q="
 
 class Platform(object):
@@ -120,15 +121,18 @@ class Platform(object):
             else: os.system('cls')
         else: pass
 
-    def check_tor_connection(self, proxy_config):
+    def check_tor_connection(self, proxy_config, *, debug: bool = False):
         test_url = 'http://api.ipify.org' 
         try:
             response = requests.get(test_url, proxies=proxy_config, timeout=10)
             print(f"{Colors.BOLD + Colors.G}Tor service is active. {Colors.END}")
             print(f"{Colors.BOLD + Colors.P}Current IP Address via Tor: {Colors.END}{response.text}")
             return True  # Connection was successful
-        except:
-            print(f"{Colors.BOLD + Colors.R} Tor is inactive or not configured properly. Cannot scrape. {Colors.END}")
+        except Exception as exc:
+            print(f"{Colors.BOLD + Colors.R}Tor is inactive or not configured properly. Cannot scrape.{Colors.END}")
+            if debug:
+                # Provide the underlying reason when debug flag is set
+                print(f"{Colors.BOLD + Colors.R}[DEBUG] Tor connectivity error: {exc}{Colors.END}")
             return False
 
 class Darkdump(object):
@@ -220,9 +224,50 @@ class Darkdump(object):
         return links
 
 
-    def crawl(self, query, amount, use_proxy=False, scrape_sites=False, scrape_images=False, debug_mode=False):
-        headers = {'User-Agent': random.choice(Headers.user_agents)}
-        proxy_config = {'http': 'socks5h://localhost:9050', 'https': 'socks5h://localhost:9050'} if use_proxy else {}
+    def crawl(
+        self,
+        query,
+        amount,
+        use_proxy: bool = False,
+        scrape_sites: bool = False,
+        scrape_images: bool = False,
+        debug_mode: bool = False,
+        browser_type: str | None = None,
+    ):
+        """
+        Crawl Ahmia results and optionally scrape target onion sites.
+
+        Parameters
+        ----------
+        browser_type : str | None
+            If provided, restrict the randomly-selected User-Agent header to the
+            specified browser family (chrome, firefox, ie, edge, opera, safari,
+            mobile).  Falls back to a completely random User-Agent when omitted.
+        """
+        # Determine an appropriate user-agent string
+        if browser_type:
+            try:
+                user_agent = Headers.get_random_by_browser(browser_type)
+            except ValueError:
+                # Fallback to a fully random UA if an invalid browser_type slips
+                # through (should be prevented by argparse choices).
+                user_agent = random.choice(Headers.user_agents)
+        else:
+            user_agent = random.choice(Headers.user_agents)
+
+        # ------------------------------------------------------------------ #
+        # Debug helper – show chosen User-Agent when debug mode is enabled
+        # ------------------------------------------------------------------ #
+        if debug_mode:
+            browser_lbl = browser_type if browser_type else "random"
+            print(f"{Colors.BOLD}{Colors.C}[DEBUG] Using User-Agent ({browser_lbl}): "
+                  f"{Colors.END}{user_agent}")
+
+        headers = {"User-Agent": user_agent}
+        proxy_config = (
+            {'http': Configuration.__socks5init__, 'https': Configuration.__socks5init__}
+            if use_proxy else {}
+        )
 
         # Fetching the initial search page
         try:
@@ -236,10 +281,12 @@ class Darkdump(object):
 
         seen_urls = set()  # This set will store URLs to avoid duplicates
 
-        if scrape_sites: 
-            if Platform(True).check_tor_connection(proxy_config) == False: return
+        if scrape_sites:
+            # Forward the debug flag so we reveal connection errors when requested
+            if not Platform(True).check_tor_connection(proxy_config, debug=debug_mode):
+                return
 
-        for idx, result in enumerate(second_results[:min(amount + 1, len(second_results))], start=1):
+        for idx, result in enumerate(second_results[:min(amount, len(second_results))]):
             site_url = result.find('cite').text
             if "http://" not in site_url and "https://" not in site_url:
                 site_url = "http://" + site_url
@@ -317,6 +364,13 @@ def darkdump_main():
     parser.add_argument("-i", "--images", help="scrape images and visual content from the site", action="store_true")
     parser.add_argument("-s", "--scrape", help="scrape the actual site for content and look for keywords", action="store_true")
     parser.add_argument("-d", "--debug", help="enable debug output", action="store_true")
+    parser.add_argument(
+        "-b", "--browser",
+        help=("specify browser type for the User-Agent header "
+              "(chrome, firefox, ie, edge, opera, safari, mobile)"),
+        choices=['chrome', 'firefox', 'ie', 'edge', 'opera', 'safari', 'mobile'],
+        type=str
+    )
 
     args = parser.parse_args()
 
@@ -338,7 +392,15 @@ def darkdump_main():
 
     if args.query:
         print(f"Searching For: {args.query} and showing {args.amount} results...\nIndexing is viable, skipping dead onions.\n")
-        Darkdump().crawl(args.query, args.amount, use_proxy=args.proxy, scrape_sites=args.scrape, scrape_images=args.images, debug_mode=args.debug)
+        Darkdump().crawl(
+            args.query,
+            args.amount,
+            use_proxy=args.proxy,
+            scrape_sites=args.scrape,
+            scrape_images=args.images,
+            debug_mode=args.debug,
+            browser_type=args.browser
+        )
     else:
         print("[~] Note: No query arguments were passed. Please supply a query to search.")
 

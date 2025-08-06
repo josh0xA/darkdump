@@ -7,6 +7,7 @@ Darkdump is a OSINT interface for carrying out deep web investgations written in
 1) ``git clone https://github.com/josh0xA/darkdump``<br/>
 2) ``cd darkdump``<br/>
 3) ``python3 -m pip install -r requirements.txt``<br/>
+   • Make sure `PySocks` is installed (it is now listed in `requirements.txt`).  
 4) ``python3 darkdump.py --help``<br/>
 
 ### Tor Configuration 
@@ -32,10 +33,18 @@ Replace `[YourHashedPasswordHere]` with a hashed password which can be generated
 Linux: `sudo systemctl start tor.service`<br/>
 MacOS: `brew services start tor`<br/>
 
+> **Port note:**  
+> • **Tor Browser** exposes a SOCKS5 proxy on **`localhost:9150`** (this is the default that Darkdump now uses).  
+> • The system Tor daemon typically listens on **`localhost:9050`**.  
+> • If you are running the daemon on 9050 instead of Tor Browser, either edit `Configuration.__socks5init__` in `darkdump.py` or start Tor Browser so the 9150 proxy is available.  
+
+Darkdump will test the connection automatically and print an error if the proxy cannot be reached.
+
 ### Example Queries: 
 `python3 darkdump.py -q "hacking" -a 10 --scrape --proxy` - search for 10 links and scrape each site <br/>
 `python3 darkdump.py -q "free movies" -a 25` - don't scrape, just return 25 links for that query (does not require tor) <br/>
 `python3 darkdump.py -q "marketplaces" -a 15 --scrape --proxy -i` - search for 10 links and scrape each site as well as find and store images.
+`python3 darkdump.py -q "cryptography" -a 5 --scrape --proxy -b firefox` – scrape 5 results while forcing a Firefox-specific User-Agent.  
 
 ## Menu
 ```
@@ -61,8 +70,34 @@ options:
   -p, --proxy           use tor proxy for scraping
   -i, --images          scrape images and visual content from the site
   -s, --scrape          scrape the actual site for content and look for keywords
+  -b {chrome,firefox,ie,edge,opera,safari,mobile}, --browser {chrome,firefox,ie,edge,opera,safari,mobile}
+                        specify the browser family to use when randomly
+                        choosing a User-Agent header (default is a completely
+                        random choice)
 
 ```
+
+## Enhanced User-Agent Handling  🚀
+Darkdump ships with an overhauled **`headers/agents.py`** module that now:
+
+* Organises more than 200 User-Agent strings by browser family (Chrome, Firefox, IE / Edge, Opera, Safari, Mobile).  
+* Provides convenience helpers:
+  * `Headers.get_random_agent()` – any UA  
+  * `Headers.get_random_by_browser('chrome')` – browser-specific UA  
+  * `Headers.get_random_by_os('windows')` – OS-specific UA  
+  * `Headers.get_modern_agent()` – modern (2022+) UA  
+* Fixes malformed strings and removes duplicates.
+
+Use the new **`-b / --browser`** CLI switch (see Menu above) to restrict the UA that Darkdump advertises during requests.
+
+For a hands-on tour of the new API, run the helper script:
+
+```bash
+python test_headers.py
+```
+
+It prints examples for every helper method and shows category counts.
+
 ## Visual
 <p align="center">
   <img src="imgs/darkdump_example.png">
