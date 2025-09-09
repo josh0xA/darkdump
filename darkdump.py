@@ -149,7 +149,7 @@ class Darkdump(object):
         word_tokens = word_tokenize(clean_text.lower())
         filtered_text = [word for word in word_tokens if word.isalnum() and not word in stop_words]
         freq_dist = FreqDist(filtered_text)
-        keywords = list(freq_dist)[:18] 
+        keywords = list(freq_dist)[:18]
         return keywords
 
     def analyze_text(self, text):
@@ -223,7 +223,7 @@ class Darkdump(object):
         return links
 
 
-    def crawl(self, query, amount, use_proxy=False, scrape_sites=False, scrape_images=False):
+    def crawl(self, query, amount, use_proxy=False, scrape_sites=False, scrape_images=False, debug_mode=False):
         headers = {'User-Agent': random.choice(Headers.user_agents)}
         proxy_config = {'http': 'socks5h://localhost:9050', 'https': 'socks5h://localhost:9050'} if use_proxy else {}
 
@@ -258,7 +258,6 @@ class Darkdump(object):
                     try:
                         site_response = requests.get(site_url, headers=headers, proxies=proxy_config)
                         site_soup = BeautifulSoup(site_response.content, 'html.parser')
-
                         text_analysis = self.analyze_text(site_soup.get_text())
                         metadata = self.extract_metadata(site_soup)
                         links = self.extract_links(site_soup)
@@ -291,7 +290,9 @@ class Darkdump(object):
 
                     except Exception as e:
                         print(f"{Colors.BOLD + Colors.O} Dead onion, skipping...: {site_url} {Colors.END}")
-
+                        if debug_mode:
+                            print(f"{Colors.BOLD + Colors.R}[DEBUG] Exception: {e}{Colors.END}")
+	
                 else: # No scrape
                     print(f"{Colors.BOLD}{idx + 1}. --- [+] Website: {Colors.END}{Colors.P}{title.strip()}{Colors.END}")
                     print(f"{Colors.BOLD}\t Information: {Colors.END}{Colors.G}{description.strip()}{Colors.END}")
@@ -318,6 +319,7 @@ def darkdump_main():
     parser.add_argument("-p", "--proxy", help="use tor proxy for scraping", action="store_true")
     parser.add_argument("-i", "--images", help="scrape images and visual content from the site", action="store_true")
     parser.add_argument("-s", "--scrape", help="scrape the actual site for content and look for keywords", action="store_true")
+    parser.add_argument("-d", "--debug", help="enable debug output", action="store_true")
 
     args = parser.parse_args()
 
@@ -334,9 +336,12 @@ def darkdump_main():
         parser.print_help()
         sys.exit(1)
 
+    if args.debug:
+        print(f"{Colors.R}DEBUG mode is on.{Colors.W}")
+
     if args.query:
         print(f"Searching For: {args.query} and showing {args.amount} results...\nIndexing is viable, skipping dead onions.\n")
-        Darkdump().crawl(args.query, args.amount, use_proxy=args.proxy, scrape_sites=args.scrape, scrape_images=args.images)
+        Darkdump().crawl(args.query, args.amount, use_proxy=args.proxy, scrape_sites=args.scrape, scrape_images=args.images, debug_mode=args.debug)
     else:
         print("[~] Note: No query arguments were passed. Please supply a query to search.")
 
