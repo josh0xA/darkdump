@@ -88,7 +88,8 @@ class Configuration:
     urls = []
 
     __socks5init__ = "socks5h://localhost:9050"
-    __darkdump_api__ = "https://ahmia.fi/search/?q="
+    __darkdump_base__ = "https://ahmia.fi"
+    __darkdump_api__ = f"{__darkdump_base__}/search/?q="
 
 class Platform(object):
     def __init__(self, execpltf):
@@ -229,10 +230,30 @@ class Darkdump(object):
 
         # Fetching the initial search page
         try:
-            page = requests.get(Configuration.__darkdump_api__ + query, headers=headers)
+            homepage = requests.get(Configuration.__darkdump_base__, headers=headers)
+            if homepage.status_code != 200:
+                raise Exception(f"Couldn't fetch {Configuration.__darkdump_base__} code {homepage.status_code}")
+
+            soup = BeautifulSoup(homepage.content, 'html.parser')
+            nonce_el = soup.select_one('#searchForm input[type="hidden"]')
+            if nonce_el is None:
+                raise Exception("Couldn't find nonce in HomePage")
+
+            nonce = f"&{nonce_el.attrs["name"]}={nonce_el.attrs["value"]}"
+            url = Configuration.__darkdump_api__ + query + nonce
+            page = requests.get(url, headers=headers)
+            if page.status_code != 200:
+                raise Exception(f"Couldn't fetch {url} code {page.status_code}")
+
             soup = BeautifulSoup(page.content, 'html.parser')
             results = soup.find(id='ahmiaResultsPage')  # Adjust based on actual result container ID
+            if results is None:
+                raise Exception(f"Couldn't extract results from {url}")
+
             second_results = results.find_all('li', class_='result')  # Adjust based on actual results tag and class
+            if any([result is None for result in results]):
+                raise Exception(f"Couldn't parse a result from {url}")
+
         except Exception as e:
             print(f"{Colors.BOLD + Colors.R} Error in fetching Ahmia.fi: {e} {Colors.END}")
             return
